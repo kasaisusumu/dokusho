@@ -129,9 +129,14 @@
     <script>
         let readingData = JSON.parse(localStorage.getItem('readingData')) || {};
         let currentStartDate = getCurrentStartDate(); // 現在の週の開始日
+        let lastEndPage = localStorage.getItem('lastEndPage');
+        lastEndPage = lastEndPage ? parseInt(lastEndPage, 10) : 0; // 終了ページ＋1を初期化して取得
 
         // 今日の日付をデフォルトに設定
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
+
+        // 終了ページ＋1を開始ページの隣に表示
+        document.getElementById('start-page').value = lastEndPage + 1;  // 終了ページ+1を開始ページとして設定
 
         // 現在の週の開始日を取得
         function getCurrentStartDate() {
@@ -247,7 +252,13 @@
             }
             
             localStorage.setItem('readingData', JSON.stringify(readingData));
+            localStorage.setItem('lastEndPage', endPage); // 終了ページを保存
             updateTable();
+
+            // 入力欄をクリア
+            document.getElementById('reading-form').reset();
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];  // 日付を今日に設定
+            document.getElementById('start-page').value = endPage + 1;  // 終了ページ＋1を開始ページとして表示
         });
         
         // 前の7日間へ移動
