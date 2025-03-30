@@ -149,8 +149,11 @@
                 const date = new Date(start);
                 date.setDate(start.getDate() + i);
                 const formattedDate = date.toISOString().split('T')[0];
+                // 0ページのデータはグラフには表示し、表には表示しない
                 if (readingData[formattedDate]) {
                     weekData[formattedDate] = readingData[formattedDate];
+                } else {
+                    weekData[formattedDate] = 0; // グラフには0を表示する
                 }
             }
             return weekData;
@@ -162,11 +165,13 @@
             const weekData = getWeekData(currentStartDate);
             logTable.innerHTML = '';
             for (const date in weekData) {
-                logTable.innerHTML += `<tr>
-                    <td>${date}</td>
-                    <td>${weekData[date]}</td>
-                    <td><button class="delete-btn" onclick="deleteRecord('${date}')">削除</button></td>
-                </tr>`;
+                if (weekData[date] > 0) {  // 0ページは表に表示しない
+                    logTable.innerHTML += `<tr>
+                        <td>${date}</td>
+                        <td>${weekData[date]}</td>
+                        <td><button class="delete-btn" onclick="deleteRecord('${date}')">削除</button></td>
+                    </tr>`;
+                }
             }
             updateChart(weekData);
         }
