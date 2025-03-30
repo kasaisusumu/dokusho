@@ -108,6 +108,11 @@
     <div class="chart-container">
         <canvas id="readingChart" width="400" height="200"></canvas>
     </div>
+	
+	<div class="navigate-buttons">
+        <button id="prevWeekBtn">＜ 前の7日間</button>
+        <button id="nextWeekBtn">次の7日間 ＞</button>
+    </div>
 
 	<h2>記録一覧</h2>
     <div class="table-container">
@@ -123,10 +128,7 @@
         </table>
     </div>
 	
-    <div class="navigate-buttons">
-        <button id="prevWeekBtn">＜ 前の7日間</button>
-        <button id="nextWeekBtn">次の7日間 ＞</button>
-    </div>
+    
     
     <script>
         let readingData = JSON.parse(localStorage.getItem('readingData')) || {};
