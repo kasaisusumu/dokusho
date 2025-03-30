@@ -102,7 +102,14 @@
         <button type="submit">記録</button>
     </form>
     
-    <h2>記録一覧</h2>
+    
+
+    <h2>読書進捗グラフ</h2>
+    <div class="chart-container">
+        <canvas id="readingChart" width="400" height="200"></canvas>
+    </div>
+
+	<h2>記録一覧</h2>
     <div class="table-container">
         <table>
             <thead>
@@ -115,12 +122,7 @@
             <tbody id="reading-log"></tbody>
         </table>
     </div>
-
-    <h2>読書進捗グラフ</h2>
-    <div class="chart-container">
-        <canvas id="readingChart" width="400" height="200"></canvas>
-    </div>
-
+	
     <div class="navigate-buttons">
         <button id="prevWeekBtn">＜ 前の7日間</button>
         <button id="nextWeekBtn">次の7日間 ＞</button>
