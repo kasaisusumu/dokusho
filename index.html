@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-	<!-- Google tag (gtag.js) -->
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TQYWYRTL81"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -12,7 +12,7 @@
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>読書ページ数記録</title>
+    <title>読書ページ数記録・管理</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -99,7 +99,6 @@
             margin-top: 20px;
         }
     </style>
-    <!-- Chart.jsのライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -110,20 +109,18 @@
         <label>終了ページ: <input type="number" id="end-page" required /></label>
         <button type="submit">記録</button>
     </form>
-    
-    
 
     <h2>読書進捗グラフ</h2>
     <div class="chart-container">
         <canvas id="readingChart" width="400" height="200"></canvas>
     </div>
-	
-	<div class="navigate-buttons">
+
+    <div class="navigate-buttons">
         <button id="prevWeekBtn">＜ 前の7日間</button>
         <button id="nextWeekBtn">次の7日間 ＞</button>
     </div>
 
-	<h2>記録一覧</h2>
+    <h2>記録一覧</h2>
     <div class="table-container">
         <table>
             <thead>
@@ -136,54 +133,51 @@
             <tbody id="reading-log"></tbody>
         </table>
     </div>
-	
-    
-    
+
     <script>
+        // 日本時間での日付（YYYY-MM-DD）を返す関数
+        function getJSTDateString(date = new Date()) {
+            const jst = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+            return jst.toISOString().split('T')[0];
+        }
+
         let readingData = JSON.parse(localStorage.getItem('readingData')) || {};
         let currentStartDate = getCurrentStartDate(); // 現在の週の開始日
         let lastEndPage = localStorage.getItem('lastEndPage');
-        lastEndPage = lastEndPage ? parseInt(lastEndPage, 10) : 0; // 終了ページ＋1を初期化して取得
+        lastEndPage = lastEndPage ? parseInt(lastEndPage, 10) : 0;
 
-        // 今日の日付をデフォルトに設定
-        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        // 今日の日付をデフォルトに設定（JST）
+        document.getElementById('date').value = getJSTDateString();
 
-        // 終了ページ＋1を開始ページの隣に表示
-        document.getElementById('start-page').value = lastEndPage + 1;  // 終了ページ+1を開始ページとして設定
+        // 終了ページ＋1を開始ページに設定
+        document.getElementById('start-page').value = lastEndPage + 1;
 
         // 現在の週の開始日を取得
         function getCurrentStartDate() {
             const today = new Date();
-            const day = today.getDay(),
-                  diff = today.getDate() - day + (day == 0 ? -6 : 1); // Adjust if it's Sunday
-            return new Date(today.setDate(diff)).toISOString().split('T')[0];
+            const day = today.getDay();
+            const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+            return getJSTDateString(new Date(today.setDate(diff)));
         }
 
-        // 週の開始日から7日間のデータを取得
         function getWeekData(startDate) {
             const start = new Date(startDate);
             const weekData = {};
             for (let i = 0; i < 7; i++) {
                 const date = new Date(start);
                 date.setDate(start.getDate() + i);
-                const formattedDate = date.toISOString().split('T')[0];
-                // 0ページのデータはグラフには表示し、表には表示しない
-                if (readingData[formattedDate]) {
-                    weekData[formattedDate] = readingData[formattedDate];
-                } else {
-                    weekData[formattedDate] = 0; // グラフには0を表示する
-                }
+                const formattedDate = getJSTDateString(date);
+                weekData[formattedDate] = readingData[formattedDate] || 0;
             }
             return weekData;
         }
 
-        // テーブル更新
         function updateTable() {
             const logTable = document.getElementById('reading-log');
             const weekData = getWeekData(currentStartDate);
             logTable.innerHTML = '';
             for (const date in weekData) {
-                if (weekData[date] > 0) {  // 0ページは表に表示しない
+                if (weekData[date] > 0) {
                     logTable.innerHTML += `<tr>
                         <td>${date}</td>
                         <td>${weekData[date]}</td>
@@ -194,7 +188,6 @@
             updateChart(weekData);
         }
 
-        // グラフ更新
         function updateChart(weekData) {
             const dates = Object.keys(weekData);
             const pagesRead = Object.values(weekData);
@@ -234,7 +227,6 @@
             });
         }
 
-        // 記録削除関数
         function deleteRecord(date) {
             if (confirm(`本当に${date}の記録を削除しますか？`)) {
                 delete readingData[date];
@@ -243,57 +235,51 @@
             }
         }
 
-        // フォームの送信イベント
         document.getElementById('reading-form').addEventListener('submit', function(event) {
             event.preventDefault();
-            
+
             const date = document.getElementById('date').value;
             const startPage = parseInt(document.getElementById('start-page').value, 10);
             const endPage = parseInt(document.getElementById('end-page').value, 10);
-            
+
             if (endPage < startPage) {
                 alert('終了ページは開始ページより大きくしてください');
                 return;
             }
-            
-            const pagesRead = endPage - startPage;
-            
+
+            const pagesRead = endPage - startPage+1;
+
             if (readingData[date]) {
                 readingData[date] += pagesRead;
             } else {
                 readingData[date] = pagesRead;
             }
-            
+
             localStorage.setItem('readingData', JSON.stringify(readingData));
-            localStorage.setItem('lastEndPage', endPage); // 終了ページを保存
+            localStorage.setItem('lastEndPage', endPage);
             updateTable();
 
-            // 入力欄をクリア
             document.getElementById('reading-form').reset();
-            document.getElementById('date').value = new Date().toISOString().split('T')[0];  // 日付を今日に設定
-            document.getElementById('start-page').value = endPage + 1;  // 終了ページ＋1を開始ページとして表示
+            document.getElementById('date').value = getJSTDateString();
+            document.getElementById('start-page').value = endPage + 1;
         });
-        
-        // 前の7日間へ移動
+
         document.getElementById('prevWeekBtn').addEventListener('click', function() {
             currentStartDate = getNextOrPrevStartDate(currentStartDate, -7);
             updateTable();
         });
 
-        // 次の7日間へ移動
         document.getElementById('nextWeekBtn').addEventListener('click', function() {
             currentStartDate = getNextOrPrevStartDate(currentStartDate, 7);
             updateTable();
         });
 
-        // 次または前の7日間の開始日を取得
         function getNextOrPrevStartDate(startDate, daysOffset) {
             const date = new Date(startDate);
             date.setDate(date.getDate() + daysOffset);
-            return new Date(date).toISOString().split('T')[0];
+            return getJSTDateString(date);
         }
 
-        // ページロード時にテーブルとグラフを更新
         updateTable();
     </script>
 </body>
